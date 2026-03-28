@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParkPulse</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f0;
+            color: #1a1a1a;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            padding: 0 32px;
+            height: 56px;
+            background: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
+        }
+        .logo span { color: #ea580c; }
+        .nav-links { display: flex; gap: 8px; }
+        .nav-links a {
+            text-decoration: none;
+            color: #666;
+            font-size: 14px;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .nav-links a:hover { background: #f5f5f0; color: #1a1a1a; }
+        .nav-links a.active {
+            color: #ea580c;
+            font-weight: 600;
+            border-bottom: 2px solid #ea580c;
+            border-radius: 0;
+        }
+
+        /* Views */
+        .view { display: none; }
+        .view.active { display: block; }
+
+        /* Landing Page */
+        .hero {
+            text-align: center;
+            padding: 80px 32px 48px;
+            background: linear-gradient(180deg, #fff8f5 0%, #f5f5f0 100%);
+        }
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 700;
+            color: #ea580c;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+        .hero p {
+            font-size: 18px;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto 32px;
+            line-height: 1.6;
+        }
+        .hero-cta {
+            display: inline-block;
+            background: #ea580c;
+            color: white;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: background 0.15s;
+        }
+        .hero-cta:hover { background: #c2410c; }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 48px 32px 80px;
+        }
+        .feature-card {
+            background: white;
+            border-radius: 12px;
+            padding: 32px 24px;
+            border: 1px solid #e8e8e8;
+            transition: box-shadow 0.2s;
+        }
+        .feature-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 16px;
+        }
+        .feature-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .feature-card p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+        .icon-occupancy { background: #fff2ec; }
+        .icon-revenue { background: #fef3c7; }
+        .icon-alerts { background: #ecfdf5; }
+
+        /* Dashboard */
+        .dashboard-header {
+            padding: 24px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .dashboard-header h2 {
+            font-size: 22px;
+            font-weight: 700;
+        }
+        .search-bar {
+            padding: 10px 16px;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 280px;
+            outline: none;
+            background: white;
+        }
+        .search-bar:focus { border-color: #ea580c; box-shadow: 0 0 0 3px rgba(234,88,12,0.1); }
+
+        /* Stats row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            padding: 0 32px 24px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #e8e8e8;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+        .stat-value.orange { color: #ea580c; }
+
+        /* Garage table */
+        .table-container {
+            padding: 0 32px 32px;
+        }
+        .garage-table {
+            width: 100%;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #e8e8e8;
+            overflow: hidden;
+        }
+        .garage-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .garage-table th {
+            text-align: left;
+            padding: 14px 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #e8e8e8;
+            background: #fafafa;
+        }
+        .garage-table td {
+            padding: 16px 20px;
+            font-size: 14px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .garage-table tr:last-child td { border-bottom: none; }
+        .garage-table tbody tr {
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        .garage-table tbody tr:hover { background: #fff8f5; }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-available { background: #ecfdf5; color: #059669; }
+        .badge-full { background: #fef2f2; color: #dc2626; }
+        .badge-maintenance { background: #fef9c3; color: #a16207; }
+
+        /* Occupancy bar */
+        .occupancy-bar {
+            width: 120px;
+            height: 8px;
+            background: #e8e8e8;
+            border-radius: 4px;
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        .occupancy-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        .fill-low { background: #22c55e; }
+        .fill-medium { background: #ea580c; }
+        .fill-high { background: #dc2626; }
+
+        /* Detail panel */
+        .detail-overlay {
+            display: none;
+            position: fixed;
+            top: 0; right: 0; bottom: 0; left: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 100;
+        }
+        .detail-overlay.open { display: block; }
+        .detail-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 420px;
+            height: 100%;
+            background: white;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+            z-index: 101;
+            padding: 32px;
+            overflow-y: auto;
+            transform: translateX(100%);
+            transition: transform 0.25s ease;
+        }
+        .detail-overlay.open .detail-panel { transform: translateX(0); }
+        .detail-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #888;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .detail-close:hover { background: #f5f5f0; }
+        .detail-panel h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .detail-panel .detail-address {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 24px;
+        }
+        .detail-section {
+            margin-bottom: 24px;
+        }
+        .detail-section h4 {
+            font-size: 12px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .detail-stat {
+            background: #f9f9f6;
+            padding: 14px;
+            border-radius: 8px;
+        }
+        .detail-stat .label {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 2px;
+        }
+        .detail-stat .value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .detail-history {
+            list-style: none;
+        }
+        .detail-history li {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .detail-history li:last-child { border-bottom: none; }
+        .history-time { color: #888; }
+
+        /* Timeline */
+        .timeline-header {
+            padding: 24px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .timeline-header h2 {
+            font-size: 22px;
+            font-weight: 700;
+        }
+        .filter-group {
+            display: flex;
+            gap: 8px;
+        }
+        .filter-btn {
+            padding: 6px 14px;
+            border-radius: 6px;
+            border: 1px solid #d0d0d0;
+            background: white;
+            font-size: 13px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.15s;
+        }
+        .filter-btn:hover { border-color: #ea580c; color: #ea580c; }
+        .filter-btn.active {
+            background: #ea580c;
+            color: white;
+            border-color: #ea580c;
+        }
+        .timeline-container {
+            padding: 0 32px 32px;
+            max-width: 800px;
+        }
+        .timeline-date {
+            font-size: 13px;
+            font-weight: 600;
+            color: #888;
+            padding: 16px 0 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .timeline-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .timeline-item:last-child { border-bottom: none; }
+        .timeline-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-top: 5px;
+            flex-shrink: 0;
+        }
+        .dot-revenue { background: #ea580c; }
+        .dot-rate { background: #8b5cf6; }
+        .dot-alert { background: #dc2626; }
+        .dot-capacity { background: #0891b2; }
+        .timeline-content { flex: 1; }
+        .timeline-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        .timeline-desc {
+            font-size: 13px;
+            color: #888;
+        }
+        .timeline-meta {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 4px;
+        }
+        .timeline-amount {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 768px) {
+            .features { grid-template-columns: 1fr; }
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .detail-panel { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">Park<span>Pulse</span></div>
+        <div class="nav-links">
+            <a href="#" onclick="showView('landing')" id="nav-landing" class="active">Home</a>
+            <a href="#" onclick="showView('dashboard')" id="nav-dashboard">Dashboard</a>
+            <a href="#" onclick="showView('timeline')" id="nav-timeline">Revenue</a>
+        </div>
+    </nav>
+
+    <!-- Landing Page -->
+    <div id="view-landing" class="view active">
+        <div class="hero">
+            <h1>Know every spot.<br>Own every dollar.</h1>
+            <p>ParkPulse gives building operators full visibility into garage occupancy, revenue, and performance. Six garages or sixty, one dashboard runs them all.</p>
+            <button class="hero-cta" onclick="showView('dashboard')">See the Dashboard</button>
+        </div>
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon icon-occupancy">🅿️</div>
+                <h3>Live Occupancy</h3>
+                <p>Track every garage in real time. See occupancy percentages, spot trends, and know which locations are approaching capacity before they hit it.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon icon-revenue">💰</div>
+                <h3>Revenue Tracking</h3>
+                <p>Daily revenue by location, rate change history, and trend analysis. Know exactly what each garage earns and where the growth opportunities are.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon icon-alerts">🔔</div>
+                <h3>Smart Alerts</h3>
+                <p>Capacity warnings, maintenance flags, and revenue anomalies delivered automatically. Act on problems before tenants notice them.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="view-dashboard" class="view">
+        <div class="dashboard-header">
+            <h2>Garage Occupancy</h2>
+            <input type="text" class="search-bar" placeholder="Search garages..." oninput="filterGarages(this.value)">
+        </div>
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-label">Total Spaces</div>
+                <div class="stat-value">4,280</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Occupied Now</div>
+                <div class="stat-value orange">3,412</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Revenue Today</div>
+                <div class="stat-value">$34,650</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Avg Occupancy</div>
+                <div class="stat-value">79.7%</div>
+            </div>
+        </div>
+        <div class="table-container">
+            <div class="garage-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Garage</th>
+                            <th>Location</th>
+                            <th>Occupancy</th>
+                            <th>Spaces</th>
+                            <th>Revenue Today</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="garage-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Timeline -->
+    <div id="view-timeline" class="view">
+        <div class="timeline-header">
+            <h2>Revenue Timeline</h2>
+            <div class="filter-group">
+                <button class="filter-btn active" onclick="filterTimeline('all', this)">All</button>
+                <button class="filter-btn" onclick="filterTimeline('revenue', this)">Revenue</button>
+                <button class="filter-btn" onclick="filterTimeline('rate', this)">Rate Changes</button>
+                <button class="filter-btn" onclick="filterTimeline('alert', this)">Alerts</button>
+            </div>
+        </div>
+        <div class="timeline-container" id="timeline-container"></div>
+    </div>
+
+    <!-- Detail Panel -->
+    <div class="detail-overlay" id="detail-overlay" onclick="closeDetail(event)">
+        <div class="detail-panel" id="detail-panel">
+            <button class="detail-close" onclick="closePanel()">×</button>
+            <div id="detail-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // Garage data
+        const garages = [
+            {
+                name: "Post Office Square Garage",
+                address: "100 Pearl St, Boston",
+                neighborhood: "Financial District",
+                occupancy: 94,
+                totalSpaces: 1020,
+                revenueToday: 12480,
+                status: "full",
+                rate: "$38/day",
+                monthlyRate: "$425/mo",
+                manager: "David Chen",
+                phone: "(617) 555-0142",
+                hours: "24/7",
+                recentActivity: [
+                    { time: "2:15 PM", event: "Capacity alert triggered (>90%)" },
+                    { time: "11:30 AM", event: "Revenue milestone: $10,000" },
+                    { time: "8:45 AM", event: "Morning rush peaked at 97%" },
+                    { time: "6:00 AM", event: "Overnight occupancy: 34%" }
+                ]
+            },
+            {
+                name: "Prudential Center Garage",
+                address: "800 Boylston St, Boston",
+                neighborhood: "Back Bay",
+                occupancy: 82,
+                totalSpaces: 880,
+                revenueToday: 8920,
+                status: "available",
+                rate: "$42/day",
+                monthlyRate: "$475/mo",
+                manager: "Sarah Mitchell",
+                phone: "(617) 555-0187",
+                hours: "5 AM - 1 AM",
+                recentActivity: [
+                    { time: "1:45 PM", event: "Lunch rush subsiding" },
+                    { time: "12:00 PM", event: "Peak occupancy: 88%" },
+                    { time: "9:15 AM", event: "Event rate activated (Celtics)" },
+                    { time: "7:00 AM", event: "Morning occupancy: 41%" }
+                ]
+            },
+            {
+                name: "Government Center Garage",
+                address: "50 New Sudbury St, Boston",
+                neighborhood: "Government Center",
+                occupancy: 71,
+                totalSpaces: 750,
+                revenueToday: 5340,
+                status: "available",
+                rate: "$32/day",
+                monthlyRate: "$380/mo",
+                manager: "Michael Torres",
+                phone: "(617) 555-0203",
+                hours: "24/7",
+                recentActivity: [
+                    { time: "2:00 PM", event: "Steady flow, no alerts" },
+                    { time: "10:30 AM", event: "Court session parking surge" },
+                    { time: "8:00 AM", event: "Government employee wave" },
+                    { time: "5:30 AM", event: "Early bird rate applied" }
+                ]
+            },
+            {
+                name: "Seaport Square Garage",
+                address: "21 Dry Dock Ave, Boston",
+                neighborhood: "Seaport",
+                occupancy: 88,
+                totalSpaces: 650,
+                revenueToday: 4850,
+                status: "available",
+                rate: "$35/day",
+                monthlyRate: "$410/mo",
+                manager: "Jessica Park",
+                phone: "(617) 555-0156",
+                hours: "24/7",
+                recentActivity: [
+                    { time: "1:30 PM", event: "Convention center overflow detected" },
+                    { time: "11:00 AM", event: "Rate increased to surge pricing" },
+                    { time: "9:00 AM", event: "Tech company commuter peak" },
+                    { time: "6:30 AM", event: "Overnight: 22%" }
+                ]
+            },
+            {
+                name: "Kendall Square Garage",
+                address: "90 Broadway, Cambridge",
+                neighborhood: "Kendall Square",
+                occupancy: 45,
+                totalSpaces: 580,
+                revenueToday: 1860,
+                status: "maintenance",
+                rate: "$30/day",
+                monthlyRate: "$350/mo",
+                manager: "Robert Kim",
+                phone: "(617) 555-0219",
+                hours: "6 AM - 11 PM",
+                recentActivity: [
+                    { time: "12:00 PM", event: "Level 3 closed for maintenance" },
+                    { time: "10:00 AM", event: "Maintenance crew arrived" },
+                    { time: "8:30 AM", event: "Reduced capacity notice posted" },
+                    { time: "7:00 AM", event: "Elevator inspection started" }
+                ]
+            },
+            {
+                name: "Fenway Garage",
+                address: "1330 Boylston St, Boston",
+                neighborhood: "Fenway",
+                occupancy: 63,
+                totalSpaces: 400,
+                revenueToday: 1200,
+                status: "available",
+                rate: "$28/day",
+                monthlyRate: "$320/mo",
+                manager: "Amanda Liu",
+                phone: "(617) 555-0178",
+                hours: "24/7",
+                recentActivity: [
+                    { time: "2:30 PM", event: "Pre-game pricing begins at 4 PM" },
+                    { time: "11:00 AM", event: "Hospital staff parking steady" },
+                    { time: "9:00 AM", event: "Student rate applied" },
+                    { time: "7:30 AM", event: "Morning occupancy: 28%" }
+                ]
+            }
+        ];
+
+        // Timeline data
+        const timelineEvents = [
+            { date: "March 28, 2026", time: "2:15 PM", type: "alert", title: "Capacity alert: Post Office Square", desc: "Occupancy exceeded 90% threshold", amount: "", garage: "Post Office Square" },
+            { date: "March 28, 2026", time: "1:30 PM", type: "revenue", title: "Surge pricing activated", desc: "Seaport Square rate increased to $45/day", amount: "+$45/day", garage: "Seaport Square" },
+            { date: "March 28, 2026", time: "11:30 AM", type: "revenue", title: "Revenue milestone", desc: "Post Office Square passed $10,000 daily revenue", amount: "$10,000", garage: "Post Office Square" },
+            { date: "March 28, 2026", time: "9:15 AM", type: "rate", title: "Event rate activated", desc: "Prudential Center switched to Celtics game pricing", amount: "$52/day", garage: "Prudential Center" },
+            { date: "March 28, 2026", time: "8:30 AM", type: "alert", title: "Maintenance notice", desc: "Kendall Square Level 3 closed for elevator inspection", amount: "-200 spots", garage: "Kendall Square" },
+            { date: "March 27, 2026", time: "6:00 PM", type: "revenue", title: "Daily close: $32,100", desc: "All garages combined end-of-day revenue", amount: "$32,100", garage: "All locations" },
+            { date: "March 27, 2026", time: "4:00 PM", type: "rate", title: "Pre-game pricing started", desc: "Fenway Garage rate increased for Red Sox game", amount: "$55/day", garage: "Fenway" },
+            { date: "March 27, 2026", time: "2:45 PM", type: "alert", title: "Full capacity reached", desc: "Government Center hit 100% during court session overflow", amount: "", garage: "Government Center" },
+            { date: "March 27, 2026", time: "10:00 AM", type: "rate", title: "Early bird rate expired", desc: "Government Center returned to standard daily rate", amount: "$32/day", garage: "Government Center" },
+            { date: "March 27, 2026", time: "8:00 AM", type: "revenue", title: "Monthly pass renewals", desc: "14 monthly passes renewed across 3 locations", amount: "+$5,810", garage: "Multiple" },
+            { date: "March 26, 2026", time: "5:30 PM", type: "revenue", title: "Daily close: $29,840", desc: "All garages combined end-of-day revenue", amount: "$29,840", garage: "All locations" },
+            { date: "March 26, 2026", time: "3:00 PM", type: "alert", title: "Payment system restored", desc: "Prudential Center credit card processing back online", amount: "", garage: "Prudential Center" },
+            { date: "March 26, 2026", time: "1:15 PM", type: "alert", title: "Payment system down", desc: "Prudential Center credit card reader offline, cash only", amount: "", garage: "Prudential Center" },
+            { date: "March 26, 2026", time: "9:00 AM", type: "rate", title: "Weekend rate applied", desc: "Fenway and Seaport switched to weekend pricing", amount: "$20/day", garage: "Fenway, Seaport" },
+            { date: "March 26, 2026", time: "7:30 AM", type: "capacity", title: "Low overnight occupancy", desc: "Fenway Garage dropped below 10% overnight", amount: "8%", garage: "Fenway" }
+        ];
+
+        // Navigation
+        function showView(view) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+            document.getElementById('view-' + view).classList.add('active');
+            document.getElementById('nav-' + view).classList.add('active');
+        }
+
+        // Render garages
+        function renderGarages(filter = '') {
+            const tbody = document.getElementById('garage-tbody');
+            const filtered = garages.filter(g =>
+                g.name.toLowerCase().includes(filter.toLowerCase()) ||
+                g.neighborhood.toLowerCase().includes(filter.toLowerCase()) ||
+                g.address.toLowerCase().includes(filter.toLowerCase()) ||
+                g.status.toLowerCase().includes(filter.toLowerCase())
+            );
+            tbody.innerHTML = filtered.map((g, i) => {
+                const fillClass = g.occupancy >= 90 ? 'fill-high' : g.occupancy >= 70 ? 'fill-medium' : 'fill-low';
+                const badgeClass = g.status === 'full' ? 'badge-full' : g.status === 'maintenance' ? 'badge-maintenance' : 'badge-available';
+                const statusLabel = g.status.charAt(0).toUpperCase() + g.status.slice(1);
+                const idx = garages.indexOf(g);
+                return `<tr onclick="openDetail(${idx})">
+                    <td><strong>${g.name}</strong></td>
+                    <td>${g.neighborhood}</td>
+                    <td>
+                        <div class="occupancy-bar"><div class="occupancy-fill ${fillClass}" style="width:${g.occupancy}%"></div></div>
+                        ${g.occupancy}%
+                    </td>
+                    <td>${g.totalSpaces.toLocaleString()}</td>
+                    <td>$${g.revenueToday.toLocaleString()}</td>
+                    <td><span class="badge ${badgeClass}">${statusLabel}</span></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function filterGarages(value) {
+            renderGarages(value);
+        }
+
+        // Detail panel
+        function openDetail(idx) {
+            const g = garages[idx];
+            const badgeClass = g.status === 'full' ? 'badge-full' : g.status === 'maintenance' ? 'badge-maintenance' : 'badge-available';
+            const statusLabel = g.status.charAt(0).toUpperCase() + g.status.slice(1);
+            document.getElementById('detail-content').innerHTML = `
+                <h3>${g.name}</h3>
+                <p class="detail-address">${g.address} · <span class="badge ${badgeClass}">${statusLabel}</span></p>
+                <div class="detail-section">
+                    <h4>Current Stats</h4>
+                    <div class="detail-grid">
+                        <div class="detail-stat">
+                            <div class="label">Occupancy</div>
+                            <div class="value" style="color:#ea580c">${g.occupancy}%</div>
+                        </div>
+                        <div class="detail-stat">
+                            <div class="label">Revenue Today</div>
+                            <div class="value">$${g.revenueToday.toLocaleString()}</div>
+                        </div>
+                        <div class="detail-stat">
+                            <div class="label">Daily Rate</div>
+                            <div class="value">${g.rate}</div>
+                        </div>
+                        <div class="detail-stat">
+                            <div class="label">Monthly Rate</div>
+                            <div class="value">${g.monthlyRate}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <h4>Garage Info</h4>
+                    <div class="detail-grid">
+                        <div class="detail-stat">
+                            <div class="label">Total Spaces</div>
+                            <div class="value">${g.totalSpaces}</div>
+                        </div>
+                        <div class="detail-stat">
+                            <div class="label">Hours</div>
+                            <div class="value" style="font-size:14px">${g.hours}</div>
+                        </div>
+                        <div class="detail-stat">
+                            <div class="label">Manager</div>
+                            <div class="value" style="font-size:14px">${g.manager}</div>
+                        </div>
+                        <div class="detail-stat">
+                            <div class="label">Phone</div>
+                            <div class="value" style="font-size:14px">${g.phone}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <h4>Recent Activity</h4>
+                    <ul class="detail-history">
+                        ${g.recentActivity.map(a => `<li><span>${a.event}</span><span class="history-time">${a.time}</span></li>`).join('')}
+                    </ul>
+                </div>
+            `;
+            document.getElementById('detail-overlay').classList.add('open');
+        }
+
+        function closeDetail(e) {
+            if (e.target === document.getElementById('detail-overlay')) {
+                closePanel();
+            }
+        }
+
+        function closePanel() {
+            document.getElementById('detail-overlay').classList.remove('open');
+        }
+
+        // Timeline
+        function renderTimeline(filter = 'all') {
+            const container = document.getElementById('timeline-container');
+            const filtered = filter === 'all' ? timelineEvents : timelineEvents.filter(e => e.type === filter);
+            let currentDate = '';
+            let html = '';
+            filtered.forEach(e => {
+                if (e.date !== currentDate) {
+                    currentDate = e.date;
+                    html += `<div class="timeline-date">${e.date}</div>`;
+                }
+                html += `<div class="timeline-item">
+                    <div class="timeline-dot dot-${e.type}"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">${e.title}</div>
+                        <div class="timeline-desc">${e.desc}</div>
+                        <div class="timeline-meta">${e.time} · ${e.garage}</div>
+                    </div>
+                    ${e.amount ? `<div class="timeline-amount">${e.amount}</div>` : ''}
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function filterTimeline(type, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderTimeline(type);
+        }
+
+        // Init
+        renderGarages();
+        renderTimeline();
+    </script>
+</body>
+</html>
